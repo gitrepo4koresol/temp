@@ -1,0 +1,6 @@
+<% if !payment_method.new_record? && payment_method.provider_class.name.downcase.include?('ccavenue') %>
+  <%= link_to image_tag('bluezeal_logo.jpg', alt: 'BlueZeal'), 'https://www.bluezeal.in' %>
+  <p>
+    <%= link_to 'This Module Developed by bluezeal.in', 'https://www.bluezeal.in' %>
+  </p>
+<% end %>
