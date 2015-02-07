@@ -35,7 +35,9 @@ module Spree
       @transaction.transact
       @order.save!
       logger.info("Sending order #{@order.number} to CCAvenue via transaction id #{@transaction.id}")
-      @bill_address, @ship_address = @order.bill_address, (@order.ship_address || @order.bill_address)
+      #@bill_address, @ship_address = @order.bill_address, (@order.ship_address || @order.bill_address)
+      @bill_address  = @order.bill_address
+      @ship_address  = @order.bill_address
     end
 
     # Handles CCAvenue response which contains info about payment status
