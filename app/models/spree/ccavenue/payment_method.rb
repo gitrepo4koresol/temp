@@ -6,8 +6,8 @@ module Spree
 
     # Hardcoded, because usually merchants don't know what it should look like
     def url
-#      'https://secure.ccavenue.com/transaction/transaction.do'
-      'https://test.ccavenue.com/transaction/transaction.do'
+      'https://secure.ccavenue.com/transaction/transaction.do'
+  #    'https://test.ccavenue.com/transaction/transaction.do'
     end
 
     # Refer to Spree Commerce documentation for details
