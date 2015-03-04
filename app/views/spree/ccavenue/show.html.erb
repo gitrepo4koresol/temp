@@ -10,7 +10,9 @@
           merchant_id     = @payment_method.preferred_merchant_id
           access_code     = @payment_method.preferred_access_code
           encryption_key  = @payment_method.preferred_encryption_key
-          redirect_url    = gateway_ccavenue_callback_url(@transaction, :protocol => 'http')
+          # updated by Nitin on 4th Mar 2015 for encResp - bluezeal
+#          redirect_url    = gateway_ccavenue_callback_url(@transaction, :protocol => 'http')
+          redirect_url    =  "https://eziselect.com/cctransactions"
           enc_request     = encrypted_request(@payment_method, @transaction, @order, redirect_url, encryption_key)
         %>
   

@@ -90,7 +90,7 @@ module Spree
     def decrypt_ccavenue_response_params
       logger.info "Received transaction from CCAvenue #{params.inspect}"
       encryption_key = @transaction.payment_method.preferred_encryption_key
-      query = AESCrypter.decrypt(params['encResp'], encryption_key)
+      query = AESCrypter.decrypt(params['encResp']10, encryption_key)
       Rack::Utils.parse_nested_query(query)
     end
   end
