@@ -8,6 +8,7 @@ module Spree
 
     # This action prepares necessary attributes required by CCAvenue
     def show
+
       @payment_method = Spree::PaymentMethod.find(params[:payment_method_id])
       if !@payment_method or !@payment_method.kind_of?(Spree::Ccavenue::PaymentMethod)
         flash[:error] = 'Invalid payment method for this transaction'
@@ -33,6 +34,24 @@ module Spree
                                                         :payment_method_id => @payment_method.id)
 
       @transaction.transact
+
+      # added by abhi on 14th feb for ccavenue response handling  
+  if ResponseHandler.exists?(:user_id => spree_current_user.id)
+  puts "inside if--------------------------"
+  ResponseHandler.where(:user_id => spree_current_user.id).delete_all
+  # create_response_handler = "INSERT INTO response_handlers (user_id,transaction_id) VALUES ('#{spree_current_user.id},'#{trid}')"
+  # puts create_response_handler
+  ResponseHandler.create([{:user_id => spree_current_user.id,:transaction_id => "#{@transaction.id}"}])
+  # ResponseHandler.connection.execute(create_response_handler)
+else
+  puts "Inside else----------------------------"
+  # create_response_handler = "INSERT INTO response_handlers (user_id,transaction_id) VALUES ('#{spree_current_user.id},'#{trid}')"
+   # puts create_response_handler
+  # ResponseHandler.connection.execute(create_response_handler)
+  ResponseHandler.create([{:user_id => spree_current_user.id,:transaction_id => "#{@transaction.id}"}])
+end
+
+
       @order.save!
       logger.info("Sending order #{@order.number} to CCAvenue via transaction id #{@transaction.id}")
       #@bill_address, @ship_address = @order.bill_address, (@order.ship_address || @order.bill_address)
@@ -42,8 +61,16 @@ module Spree
 
     # Handles CCAvenue response which contains info about payment status
     def callback
-      @transaction = Spree::Ccavenue::Transaction.find(params[:id])
-      raise "Transaction with id: #{params[:id]} not found!" unless @transaction
+      #added by Nitin for transaction id from ResponseHandler - on 4th Mar 2015
+      trid = ResponseHandler.where(:user_id => spree_current_user.id).pluck(:transaction_id).last
+
+        puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#{@tid}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+      @transaction = Spree::Ccavenue::Transaction.find(trid)
+
+        puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#{@transaction}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+      raise "Transaction with id: #{trid} not found!" unless @transaction
+
 
       params = decrypt_ccavenue_response_params # Need to decrypt params first
       logger.info "Decrypted params from CCAvenue #{params.inspect}"
@@ -90,7 +117,7 @@ module Spree
     def decrypt_ccavenue_response_params
       logger.info "Received transaction from CCAvenue #{params.inspect}"
       encryption_key = @transaction.payment_method.preferred_encryption_key
-      query = AESCrypter.decrypt(params['encResp']10, encryption_key)
+      query = AESCrypter.decrypt(params['encResp'], encryption_key)
       Rack::Utils.parse_nested_query(query)
     end
   end
